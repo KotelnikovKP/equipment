@@ -4,19 +4,6 @@ Application for working with the "equipment" entity
 ## Table of Contents
 
 - [Backend](#Backend)
-  - [How to run Locally?](#How to run Locally?)
-    - [Cloning a project from a repository](#Cloning a project from a repository)
-    - [Setting up python environment](#Setting up python environment)
-    - [Activating virtual environment](#Activating virtual environment)
-    - [Copying the config file `.env`](#Copying the config file `.env`)
-    - [Installing dependencies](#Installing dependencies)
-    - [Creating database](#Creating database)
-    - [Changing the .env file](#Changing the env file)
-    - [Creating models in the database (run the migration)](#Creating models in the database (run the migration))
-    - [Creating an application administrator user](#Creating an application administrator user)
-    - [Running the backend](#Running the backend)
-    - [Using Equipment REST API interface](#Using Equipment REST API interface)
-    - [Using Django administration UI for the application](#Using Django administration UI for the application)
 - [Frontend](#Frontend)
 
 ## Backend
