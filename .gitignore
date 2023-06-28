@@ -133,5 +133,3 @@ dmypy.json
 
 # VSCode files
 *.vscode
-
-frontend/
