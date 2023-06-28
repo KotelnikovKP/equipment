@@ -78,7 +78,7 @@ GRANT ALL PRIVILEGES ON equipment.* TO 'equipment';
 FLUSH PRIVILEGES;
 ```
 
-#### Changing the .env file
+#### Changing the env file
 
 Replace `<password>` with "equipment" user password came up above in following line of the `.env` file.
 
