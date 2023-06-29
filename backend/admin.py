@@ -1,5 +1,4 @@
 from django.contrib import admin
-from rest_framework.authtoken.admin import TokenAdmin
 
 from backend.models import EquipmentType, Equipment
 
@@ -31,6 +30,4 @@ class EquipmentAdmin(admin.ModelAdmin):
 
 admin.site.register(Equipment, EquipmentAdmin)
 
-
-TokenAdmin.raw_id_fields = ['user']
 
