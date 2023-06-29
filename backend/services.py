@@ -11,7 +11,8 @@ from rest_framework.viewsets import ModelViewSet
 from backend.serializers import EquipmentTypeListSerializer, EquipmentListSerializer, PaginationListSerializer, \
     EquipmentTypeSerializer, EquipmentTypeCreateUpdateSerializer, EquipmentTypeRequestSerializer, \
     EquipmentDetailsSerializer, EquipmentSerializer, EquipmentRequestSerializer, EquipmentUpdateSerializer, \
-    EquipmentCreateSerializer, EquipmentDeleteSerializer, ErrorCreateEquipmentSerializer, InfoCreateEquipmentSerializer
+    EquipmentCreateSerializer, EquipmentDeleteSerializer, ErrorCreateEquipmentSerializer, InfoCreateEquipmentSerializer, \
+    UserRegisterSerializer, UserSerializer, UserCreateSerializer, UserDetailsSerializer
 
 
 class GetEquipmentTypeListService:
@@ -328,7 +329,8 @@ class GetEquipmentDetailsService:
                 'equipment_type': instance.equipment_type_id,
                 'serial_number': instance.serial_number,
                 'description': instance.description
-            }
+            },
+            instance=instance
         )
         equipment_serializer.is_valid()
 
@@ -425,6 +427,89 @@ class DeleteEquipmentService:
                 'retCode': 0,
                 'retMsg': 'Ok',
                 'result': f'Equipment with id={pk} was deleted',
+                'retExtInfo': '',
+                'retTime': int(time.time() * 10 ** 3)
+            }
+        )
+        return_serializer.is_valid()
+
+        return return_serializer
+
+
+class CreateUserService:
+    """
+        Сервис регистрации пользователя
+    """
+
+    @staticmethod
+    def execute(request: Request, view: ModelViewSet, *args, **kwargs) -> UserCreateSerializer:
+        """
+            Регистрация пользователя
+        """
+
+        # Обработка входящих данных (валидация и сохранение)
+        user_serializer = UserRegisterSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        instance = user_serializer.save()
+
+        # Преобразование данных в стандартную схему для ответа
+        user_serializer = UserSerializer(data=user_serializer.data, instance=instance)
+        user_serializer.is_valid()
+
+        # Формирование схемы ответа
+        return_serializer = UserCreateSerializer(
+            data={
+                'retCode': 0,
+                'retMsg': 'Ok',
+                'result': user_serializer.data,
+                'retExtInfo': '',
+                'retTime': int(time.time() * 10 ** 3)
+            }
+        )
+        return_serializer.is_valid()
+
+        return return_serializer
+
+
+class GetUserDetailsService:
+    """
+        Сервис получения профиля пользователя
+    """
+
+    @staticmethod
+    def execute(request: Request, view: ModelViewSet, *args, **kwargs) -> UserDetailsSerializer:
+        """
+            Получение профиля пользователя
+        """
+
+        # Обработка входящих данных (корректность ключа)
+        pk = kwargs.get("pk", None)
+        if not pk:
+            raise ParseError(f"Request must have 'id' parameter", code='id')
+        try:
+            instance = view.queryset.get(pk=pk)
+        except:
+            raise NotFound(f"User with id='{pk}' was not found", code='id')
+
+        # Преобразование данных в стандартную схему для ответа
+        user_serializer = UserSerializer(
+            data={
+                'id': instance.id,
+                'username': instance.username,
+                'first_name': instance.first_name,
+                'last_name': instance.last_name,
+                'email': instance.email,
+            },
+            instance=instance
+        )
+        user_serializer.is_valid()
+
+        # Формирование схемы ответа
+        return_serializer = UserDetailsSerializer(
+            data={
+                'retCode': 0,
+                'retMsg': 'Ok',
+                'result': user_serializer.data,
                 'retExtInfo': '',
                 'retTime': int(time.time() * 10 ** 3)
             }

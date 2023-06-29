@@ -1,10 +1,6 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Index
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
 
 
 class EquipmentType(models.Model):
@@ -20,7 +16,7 @@ class EquipmentType(models.Model):
     class Meta:
         verbose_name = 'Type of equipment'
         verbose_name_plural = 'Type of equipment'
-        ordering = ['id']
+        ordering = ['name']
         indexes = (
             Index(fields=['name'], name='equ_typ__name__idx'),
         )
@@ -51,7 +47,7 @@ class Equipment(models.Model):
     class Meta:
         verbose_name = 'Equipment'
         verbose_name_plural = 'Equipment'
-        ordering = ['is_archived', 'equipment_type', 'serial_number']
+        ordering = ['id']
         indexes = (
             Index(
                 fields=['is_archived', 'equipment_type', 'serial_number'],
@@ -65,9 +61,3 @@ class Equipment(models.Model):
             ),
         ]
 
-
-# Обработчик сигнала пост-сохранения модели User для генерации токена
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)

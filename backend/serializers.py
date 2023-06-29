@@ -1,5 +1,6 @@
 import re
 
+from django.contrib.auth.models import User
 from rest_framework import serializers, status
 
 from backend.models import Equipment, EquipmentType
@@ -204,8 +205,10 @@ class EquipmentRequestSerializer(serializers.ModelSerializer):
         pattern = ''.join([self.PATTERNS.get(c, ')АДМИН ПОСТАРАЛСЯ(') for c in serial_number_mask])
         match = re.findall(pattern, serial_number)
         if not match or match[0] != serial_number:
-            raise serializers.ValidationError(f"Serial number '{serial_number}' does not match"
-                                              f" mask '{serial_number_mask}'",
+            raise serializers.ValidationError(f"Serial number '{serial_number}' does not match "
+                                              f"'{equipment_type.name}' equipment type mask '{serial_number_mask}' "
+                                              f"where 'N' is in [0-9], 'A' is in [A-Z], 'a' is in [a-z], "
+                                              f"'X' is in [A-Z, 0-9], 'Z' is in [-_@]",
                                               code='serial_number')
 
         if self.instance:
@@ -216,9 +219,10 @@ class EquipmentRequestSerializer(serializers.ModelSerializer):
             equipments = self.Meta.model.objects\
                 .filter(equipment_type_id=equipment_type.id, serial_number=serial_number)
         if len(equipments) != 0:
+            archive_flag = '-archived' if equipments[0].is_archived else ''
             raise serializers.ValidationError(f"Equipment with type '{equipment_type.name}' and "
-                                              f"serial number '{serial_number}'is already exist"
-                                              f" (id={equipments[0].pk})",
+                                              f"serial number '{serial_number}' is already exist"
+                                              f" (id={equipments[0].pk}{archive_flag})",
                                               code='serial_number')
 
         return data
@@ -290,3 +294,54 @@ class EquipmentDeleteSerializer(BaseResponseSerializer):
         Схема ответа для удаления оборудования
     """
     pass
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+        Стандартная схема пользователя (используется во всех ответах)
+    """
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', )
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    """
+        Схема пользователя во входящих запросах (регистрация)
+
+        1. Валидация полей
+        2. Проверка совпадения паролей
+    """
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ("username", "password", "password2", )
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        username = validated_data["username"]
+        password = validated_data["password"]
+        password2 = validated_data["password2"]
+        if password != password2:
+            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+        user = User(username=username)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class UserCreateSerializer(BaseResponseSerializer):
+    """
+        Схема ответа для создания пользователя
+    """
+    result = UserSerializer(many=False)
+
+
+class UserDetailsSerializer(BaseResponseSerializer):
+    """
+        Схема ответа в получении профиля пользователя
+    """
+    result = UserSerializer(many=False)
+
+

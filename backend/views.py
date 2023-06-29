@@ -5,16 +5,15 @@
     Вся обработка перенесена в сервисный слой
     Схемы запросов и ответов посредством сериализаторов
 """
-
+from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from backend.authentication import BearerAuthentication
 from backend.filters import EquipmentTypeFilter, EquipmentFilter
 from backend.helpers import expand_dict
 from backend.models import Equipment, EquipmentType
@@ -22,24 +21,10 @@ from backend.permissons import EquipmentTypePermission
 from backend.serializers import EquipmentSerializer, EquipmentTypeSerializer, EquipmentTypeListSerializer, \
     EquipmentListSerializer, simple_responses, EquipmentTypeCreateUpdateSerializer, EquipmentDetailsSerializer, \
     EquipmentRequestSerializer, EquipmentTypeRequestSerializer, EquipmentUpdateSerializer, EquipmentCreateSerializer, \
-    EquipmentDeleteSerializer
+    EquipmentDeleteSerializer, UserRegisterSerializer, UserSerializer, UserCreateSerializer, UserDetailsSerializer
 from backend.services import GetEquipmentTypeListService, GetEquipmentListService, CreateEquipmentTypeService, \
     UpdateEquipmentTypeService, GetEquipmentDetailsService, UpdateEquipmentService, CreateEquipmentService, \
-    DeleteEquipmentService
-
-
-@extend_schema(tags=['Login'])
-@extend_schema_view(
-    post=extend_schema(
-        summary='Authorize user and retrieve a bearer token',
-        description='Authorize user and retrieve a bearer token, bla-bla-bla...',
-    ),
-)
-class EquipmentCustomAuthToken(ObtainAuthToken):
-    """
-        Класс для авторизации и получения токена (используем стандартный DFR класс)
-    """
-    pass
+    DeleteEquipmentService, CreateUserService, GetUserDetailsService
 
 
 @extend_schema(tags=['Type of equipment'])
@@ -49,7 +34,6 @@ class EquipmentTypeViewSet(ModelViewSet):
     """
 
     permission_classes = (EquipmentTypePermission, )
-    authentication_classes = (BearerAuthentication, )
     queryset = EquipmentType.objects.all()
     serializer_class = EquipmentTypeSerializer
     filterset_class = EquipmentTypeFilter
@@ -100,7 +84,6 @@ class EquipmentViewSet(ModelViewSet):
     """
 
     permission_classes = (IsAuthenticated, )
-    authentication_classes = (BearerAuthentication, )
     queryset = Equipment.objects.select_related('equipment_type').filter(is_archived=False)
     serializer_class = EquipmentSerializer
     filterset_class = EquipmentFilter
@@ -115,7 +98,7 @@ class EquipmentViewSet(ModelViewSet):
             Получение пагинированого и отфильтрованного списка оборудования
         """
         equipment_list = GetEquipmentListService.execute(request, self, *args, **kwargs)
-        return Response(equipment_list.data)
+        return Response(equipment_list.initial_data)
 
     @extend_schema(
         summary='Create equipment',
@@ -168,3 +151,61 @@ class EquipmentViewSet(ModelViewSet):
         return Response(equipment_delete.data)
 
 
+@extend_schema(tags=['Auth'])
+@extend_schema_view(
+    post=extend_schema(
+        summary='Authorize user and retrieve an access token',
+        description='Authorize user and retrieve a bearer token, bla-bla-bla...',
+    ),
+)
+class EquipmentCustomTokenObtainPairView(TokenObtainPairView):
+    """
+        Класс для авторизации и получения access токена (используем стандартный DFR класс)
+    """
+    pass
+
+
+@extend_schema(tags=['Auth'])
+@extend_schema_view(
+    post=extend_schema(
+        summary='Retrieve a refresh token',
+        description='Retrieve a refresh token, bla-bla-bla...',
+    ),
+)
+class EquipmentCustomTokenRefreshView(TokenRefreshView):
+    """
+        Класс для получения refresh токена (используем стандартный DFR класс)
+    """
+    pass
+
+
+@extend_schema(tags=['Auth'])
+class UserRegisterViewSet(ModelViewSet):
+    permission_classes = (AllowAny, )
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @extend_schema(
+        summary='Register user',
+        description='Register user, bla-bla-bla...',
+        request=UserRegisterSerializer(many=False),
+        responses=expand_dict({status.HTTP_200_OK: UserCreateSerializer, }, simple_responses),
+    )
+    def create(self, request, *args, **kwargs):
+        """
+            Регистрация пользователя
+        """
+        user_create = CreateUserService.execute(request, self, *args, **kwargs)
+        return Response(user_create.data)
+
+    @extend_schema(
+        summary='Retrieve user profile',
+        description='Retrieve user profile, bla-bla-bla...',
+        responses=expand_dict({status.HTTP_200_OK: UserDetailsSerializer, }, simple_responses),
+    )
+    def retrieve(self, request, *args, **kwargs):
+        """
+            Получение профиля пользователя
+        """
+        user_details = GetUserDetailsService.execute(request, self, *args, **kwargs)
+        return Response(user_details.data)
