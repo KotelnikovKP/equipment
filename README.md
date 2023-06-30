@@ -124,4 +124,32 @@ Application web interface
 
 ---
 
-in developing...
+### How to run Locally?
+
+#### Install dependencies
+
+Assuming you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed on local machine
+
+Go to frontend directory
+
+```bash
+cd fronted
+```
+
+Run the following
+
+```bash
+npm install
+```
+
+#### Running the frontend (in dev mode)
+
+```bash
+npm run dev
+```
+
+#### Using Equipment web interface
+
+Web client is available at http://localhost:3000/
+
+---

@@ -133,3 +133,32 @@ dmypy.json
 
 # VSCode files
 *.vscode
+
+#######################
+# NUXT JS
+#######################
+# dependencies
+node_modules
+package-lock.json
+
+# logs
+npm-debug.log
+yarn-error.log
+
+# other
+.nuxt
+dist
+.vscode
+.idea
+newrelic_agent.log
+.DS_STORE
+.eslintrc
+
+# docs
+/docs
+
+# @nuxtjs/pwa
+sw.*
+
+# Optional eslint cache
+.eslintcache
