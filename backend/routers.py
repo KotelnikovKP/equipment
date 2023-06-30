@@ -38,7 +38,7 @@ class UserRouter(routers.SimpleRouter):
                       name='{basename}-list',
                       detail=False,
                       initkwargs={'suffix': 'List'}),
-        routers.Route(url=r'^{prefix}/profile/{lookup}$',
+        routers.Route(url=r'^{prefix}/profile$',
                       mapping={'get': 'retrieve'},
                       name='{basename}-detail',
                       detail=True,

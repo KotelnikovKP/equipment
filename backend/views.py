@@ -17,7 +17,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from backend.filters import EquipmentTypeFilter, EquipmentFilter
 from backend.helpers import expand_dict
 from backend.models import Equipment, EquipmentType
-from backend.permissons import EquipmentTypePermission
+from backend.permissions import EquipmentTypePermission, EquipmentPermission
 from backend.serializers import EquipmentSerializer, EquipmentTypeSerializer, EquipmentTypeListSerializer, \
     EquipmentListSerializer, simple_responses, EquipmentTypeCreateUpdateSerializer, EquipmentDetailsSerializer, \
     EquipmentRequestSerializer, EquipmentTypeRequestSerializer, EquipmentUpdateSerializer, EquipmentCreateSerializer, \
@@ -83,7 +83,7 @@ class EquipmentViewSet(ModelViewSet):
         Методы для оборудования
     """
 
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (EquipmentPermission, )
     queryset = Equipment.objects.select_related('equipment_type').filter(is_archived=False)
     serializer_class = EquipmentSerializer
     filterset_class = EquipmentFilter
@@ -183,7 +183,7 @@ class EquipmentCustomTokenRefreshView(TokenRefreshView):
 class UserRegisterViewSet(ModelViewSet):
     permission_classes = (AllowAny, )
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserRegisterSerializer
 
     @extend_schema(
         summary='Register user',
@@ -208,4 +208,4 @@ class UserRegisterViewSet(ModelViewSet):
             Получение профиля пользователя
         """
         user_details = GetUserDetailsService.execute(request, self, *args, **kwargs)
-        return Response(user_details.data)
+        return Response({"user": user_details.data})

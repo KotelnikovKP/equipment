@@ -477,15 +477,16 @@ class GetUserDetailsService:
     """
 
     @staticmethod
-    def execute(request: Request, view: ModelViewSet, *args, **kwargs) -> UserDetailsSerializer:
+    def execute(request: Request, view: ModelViewSet, *args, **kwargs) -> UserSerializer:
         """
             Получение профиля пользователя
         """
 
         # Обработка входящих данных (корректность ключа)
-        pk = kwargs.get("pk", None)
-        if not pk:
-            raise ParseError(f"Request must have 'id' parameter", code='id')
+        try:
+            pk = request.user.pk
+        except:
+            raise ParseError(f"Request must have 'user' parameter", code='id')
         try:
             instance = view.queryset.get(pk=pk)
         except:
@@ -504,16 +505,4 @@ class GetUserDetailsService:
         )
         user_serializer.is_valid()
 
-        # Формирование схемы ответа
-        return_serializer = UserDetailsSerializer(
-            data={
-                'retCode': 0,
-                'retMsg': 'Ok',
-                'result': user_serializer.data,
-                'retExtInfo': '',
-                'retTime': int(time.time() * 10 ** 3)
-            }
-        )
-        return_serializer.is_valid()
-
-        return return_serializer
+        return user_serializer
