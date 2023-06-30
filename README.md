@@ -153,3 +153,7 @@ npm run dev
 Web client is available at http://localhost:3000/
 
 ---
+
+NOTICE! To create test equipment types, use REST API method POST http://127.0.0.1:8000/api/equipment-type (see description at http://127.0.0.1:8000/api/docs/)
+
+---
