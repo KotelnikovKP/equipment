@@ -338,10 +338,11 @@ class UserCreateSerializer(BaseResponseSerializer):
     result = UserSerializer(many=False)
 
 
-class UserDetailsSerializer(BaseResponseSerializer):
+class UserDetailsSerializer(serializers.Serializer):
     """
         Схема ответа в получении профиля пользователя
     """
-    result = UserSerializer(many=False)
+
+    user = UserSerializer(many=False)
 
 
