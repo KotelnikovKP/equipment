@@ -119,7 +119,7 @@ export default {
         return {
             title: "Изменение оборудования " + this.equipment_type_name + " s/n " + this.serial_number,
         }
-    }, 
+    },
     methods: {
         async getEquipment() {
             try {
@@ -158,6 +158,8 @@ export default {
         },
         async equipmentUpdate() {
             try {
+                this.isOpen = false;
+                this.equipment_type_name = this.original_equipment_type_name;
                 let response = await this.$axios.put(`/api/equipment/${this.id}`, {
                     equipment_type: this.equipment_type_id,
                     serial_number: this.serial_number,
@@ -179,6 +181,10 @@ export default {
     },
     mounted() {
         this.getEquipment();
+        document.addEventListener('click', this.handleClickOutside);
+    },
+    destroyed() {
+        document.removeEventListener('click', this.handleClickOutside);
     },
     validations: {
         serial_number: {
