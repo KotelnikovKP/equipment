@@ -110,7 +110,7 @@ export default {
         return {
             title: "Добавление оборудования",
         }
-    }, 
+    },
     methods: {
         async onChange() {
             try {
@@ -135,6 +135,8 @@ export default {
             }
         },
         async equipmentCreate() {
+            this.isOpen = false;
+            this.equipment_type_name = this.original_equipment_type_name;
             const serial_numbers = this.serial_number.split(",")
             var equipments = [];
             for (let i = 0; i < serial_numbers.length; i += 1) {
@@ -174,6 +176,12 @@ export default {
                 err_lbl.style.display = "";
             }
         },
+    },
+    mounted() {
+        document.addEventListener('click', this.handleClickOutside);
+    },
+    destroyed() {
+        document.removeEventListener('click', this.handleClickOutside);
     },
     computed: {
         isComplete() {
