@@ -62,7 +62,7 @@ export default {
                 refreshToken: {
                     property: 'refresh',
                     data: 'refresh',
-                    maxAge: 60 * 60 * 24 * 30
+                    maxAge: 60 * 60 * 24 * 2
                 },
                 endpoints: {
                     login: { url: '/api/user/login', method: 'post' },
